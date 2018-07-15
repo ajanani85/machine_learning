@@ -198,5 +198,5 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 add_executable(annotation_tools src/annotation_tools.cpp)
-target_link_libraries(annotation_tools ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+target_link_libraries(annotation_tools ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} X11)
 add_dependencies(annotation_tools ${catkin_EXPORTED_TARGETS})

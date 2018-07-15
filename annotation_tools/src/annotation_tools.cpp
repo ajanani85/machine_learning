@@ -6,6 +6,7 @@
 #include <ros/ros.h>
 #include <iostream>
 #include <csignal>
+#include <X11/Xlib.h>
 
 
 
@@ -16,6 +17,7 @@ using namespace cv;
 // Function prototypes
 void on_mouse(int, int, int, int, void*);
 std::vector<cv::Rect> get_annotations(cv::Mat);
+void drawPreviousAnnotations(cv::Mat);
 std::string image_folder_ = "";
 std::string annotation_location_ = "";
 std::string backup_file_ = "./opencv_annotation_tag.txt";
@@ -27,14 +29,23 @@ Mat image;
 int roi_x0 = 0, roi_y0 = 0, roi_x1 = 0, roi_y1 = 0, num_of_rec = 0;
 bool start_draw = false, stop = false;
 
+Display* d;
+Screen*  s;
+int image_width;
+int image_height;
+
+std::vector<cv::Rect> previous_annotations;
+
 // Window name for visualisation purposes
 const string window_name = "OpenCV Based Annotation Tool";
+
 
 // FUNCTION : Mouse response for selecting objects in images
 // If left button is clicked, start drawing a rectangle as long as mouse moves
 // Stop drawing once a new left click is detected by the on_mouse function
-void on_mouse(int event, int x, int y, int , void * )
+void on_mouse(int event, int x, int y, int data, void * param = 0)
 {
+	
     // Action when left button is clicked
     if(event == EVENT_LBUTTONDOWN)
     {
@@ -43,10 +54,12 @@ void on_mouse(int event, int x, int y, int , void * )
             roi_x0 = x;
             roi_y0 = y;
             start_draw = true;
+            //ROS_INFO("EVENT_LBUTTONDOWN true");
         } else {
             roi_x1 = x;
             roi_y1 = y;
             start_draw = false;
+            //ROS_INFO("EVENT_LBUTTONDOWN false");
         }
     }
 
@@ -56,8 +69,11 @@ void on_mouse(int event, int x, int y, int , void * )
         // Redraw bounding box for annotation
         cv::Mat current_view;
         image.copyTo(current_view);
+        //ROS_INFO("Drawing from [%d, %d] to [%d, %d]", roi_x0, roi_y0, x, y);
         rectangle(current_view, cv::Point(roi_x0,roi_y0), cv::Point(x,y), cv::Scalar(0,0,255));
         cv::imshow(window_name, current_view);
+        cv::moveWindow(window_name, s->width / 2 - image_width, s->height / 2 - image_height);
+        //ROS_INFO("EVENT_MOUSEMOVE true");
     }
 }
 
@@ -65,24 +81,54 @@ void on_mouse(int event, int x, int y, int , void * )
 std::vector<cv::Rect> get_annotations(cv::Mat input_image)
 {
     vector<Rect> current_annotations;
+    /*if(previous_annotations.size() > 0)
+    {
+		current_annotations = previous_annotations;
+    }*/
 
     // Make it possible to exit the annotation process
     stop = false;
 
     // Init window interface and couple mouse actions
-    namedWindow(window_name, WINDOW_AUTOSIZE);
-    setMouseCallback(window_name, on_mouse);
-
+    cv::namedWindow(window_name, cv::WINDOW_AUTOSIZE);
+    cv::setMouseCallback(window_name, on_mouse);
+    cv::Mat src;
+    if(previous_annotations.size() == 1 )
+	{		
+		//ROS_INFO("x: %d, y: %d, width: %d, height: %d", previous_annotations[0].x,
+		//previous_annotations[0].y, previous_annotations[0].width, previous_annotations[0].height);
+		
+		start_draw = false;
+		on_mouse(cv::EVENT_LBUTTONDOWN, previous_annotations[0].x,previous_annotations[0].y, 0);
+		//start_draw = true;
+		//on_mouse(cv::EVENT_LBUTTONDOWN, previous_annotations[0].x + previous_annotations[0].width,previous_annotations[0].y + previous_annotations[0].height, 0);
+		
+		start_draw = true;
+		on_mouse(cv::EVENT_MOUSEMOVE, previous_annotations[0].x + previous_annotations[0].width,previous_annotations[0].y + previous_annotations[0].height, 0);
+		on_mouse(cv::EVENT_MOUSEMOVE, previous_annotations[0].x + previous_annotations[0].width,previous_annotations[0].y + previous_annotations[0].height, 0);
+				
+	}
+    
+	
     image = input_image;
     imshow(window_name, image);
+    cv::moveWindow(window_name, s->width / 2 - image_width, s->height / 2 - image_height);
     int key_pressed = 0;
-
+	//bool prev_processed = false;
     do
     {
         // Get a temporary image clone
         Mat temp_image = input_image.clone();
         Rect currentRect(0, 0, 0, 0);
-
+		/*if(previous_annotations.size() == 1 && prev_processed)
+	   	{
+			currentRect.x = previous_annotations[0].x;
+		    currentRect.y = previous_annotations[0].y;	
+		    currentRect.width = previous_annotations[0].width;
+		    currentRect.height = previous_annotations[0].height;
+		    prev_processed = false;		
+	   	}*/
+	   	
         // Keys for processing
         // You need to select one for confirming a selection and one to continue to the next image
         // Based on the universal ASCII code of the keystroke: http://www.asciitable.com/
@@ -159,6 +205,7 @@ std::vector<cv::Rect> get_annotations(cv::Mat input_image)
 
         // Force an explicit redraw of the canvas --> necessary to visualize delete correctly
         imshow(window_name, image);
+        cv::moveWindow(window_name, s->width / 2 - image_width, s->height / 2 - image_height);
     }
     // Continue as long as the next image key has not been pressed
     while(key_pressed != 110);
@@ -259,9 +306,12 @@ int main( int argc, char** argv )
     signal(SIGINT, signal_handler);
     ros::init(argc, argv, NODE_NAME_.c_str(), ros::init_options::NoSigintHandler);
     ros::NodeHandle nh;
+	
+	d = XOpenDisplay(NULL);
+	s = DefaultScreenOfDisplay(d);
 
     getParam();
-
+	
     string image_folder(image_folder_);
     string annotations_file(annotation_location_);
     if (annotations_file.empty())
@@ -278,7 +328,7 @@ int main( int argc, char** argv )
     // Start by processing the data
     // Return the image filenames inside the image folder
     map< String, vector<Rect> > annotations;
-    vector<String> filenames;
+    std::vector<String> filenames;
     String folder(image_folder);
     glob(folder, filenames);
 
@@ -298,7 +348,9 @@ int main( int argc, char** argv )
     for (size_t i = first_image_index_; i < filenames.size(); i++)
     {
         // Read in an image
-        Mat current_image = imread(filenames[i]);
+        cv::Mat current_image = imread(filenames[i]);
+        image_width = current_image.rows;
+        image_height = current_image.cols;
         // Check if the image is actually read - avoid other files in the folder, because glob() takes them all
         // If not then simply skip this iteration
         if(current_image.empty()){
@@ -309,8 +361,14 @@ int main( int argc, char** argv )
 
         // Perform annotations & store the result inside the vectorized structure
         // If the image was resized before, then resize the found annotations back to original dimensions
-        vector<Rect> current_annotations = get_annotations(current_image);
-
+        
+        std::vector<cv::Rect> current_annotations = get_annotations(current_image);
+		
+		if(current_annotations.size() > 0 )
+		{
+			previous_annotations = current_annotations;
+		}
+		
         annotations[filenames[i]] = current_annotations;
         printf("\rImage Left: %d", (int)(filenames.size() - i - 1));
         fflush(stdout);

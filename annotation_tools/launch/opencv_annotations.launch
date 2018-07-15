@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
 <launch>
-	<arg name="images" default="/home/ubuntu/catkin_ws/machine_learning_pictures/Landing/ml_2018-6-29-14-27-56/pos"/>
-	<arg name="annotations" default="/home/ubuntu/catkin_ws/machine_learning_pictures/Landing/ml_2018-6-29-14-27-56/annoations.txt"/>
+	<arg name="location" default="/home/ubuntu/catkin_ws/machine_learning_pictures/Landing/half_shadows/pos3"/>
+	<arg name="images" default="$(arg location)/pos"/>
+	<arg name="annotations" default="$(arg location)/annoations.txt"/>
 	<arg name="backup" default="/home/ubuntu/backup.txt"/>
 	<node pkg="annotation_tools" type="annotation_tools" name="annotation_tools" output="screen">
 		<param name="images" value="$(arg images)"/>
