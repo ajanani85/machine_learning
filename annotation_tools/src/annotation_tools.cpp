@@ -28,6 +28,7 @@ std::string NODE_NAME_="annotation_tools";
 Mat image;
 int roi_x0 = 0, roi_y0 = 0, roi_x1 = 0, roi_y1 = 0, num_of_rec = 0;
 bool start_draw = false, stop = false;
+bool helper_ = false;
 
 Display* d;
 Screen*  s;
@@ -93,7 +94,7 @@ std::vector<cv::Rect> get_annotations(cv::Mat input_image)
     cv::namedWindow(window_name, cv::WINDOW_AUTOSIZE);
     cv::setMouseCallback(window_name, on_mouse);
     cv::Mat src;
-    if(previous_annotations.size() == 1 )
+    if(previous_annotations.size() == 1 && helper_ )
 	{		
 		//ROS_INFO("x: %d, y: %d, width: %d, height: %d", previous_annotations[0].x,
 		//previous_annotations[0].y, previous_annotations[0].width, previous_annotations[0].height);
@@ -284,6 +285,8 @@ void getParam()
   ros::param::param<std::string>(NODE_NAME_ + "/images", image_folder_, image_folder_);
   ros::param::param<std::string>(NODE_NAME_ + "/annotations", annotation_location_, annotation_location_);
   ros::param::param<std::string>(NODE_NAME_ + "/backup", backup_file_, backup_file_);
+  ros::param::param<bool>(NODE_NAME_ + "/helper", helper_, helper_);
+  
 
   ROS_INFO("annotation_location_: %s", annotation_location_.c_str());
 
