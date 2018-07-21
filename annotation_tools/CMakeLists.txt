@@ -200,3 +200,7 @@ include_directories(
 add_executable(annotation_tools src/annotation_tools.cpp)
 target_link_libraries(annotation_tools ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} X11)
 add_dependencies(annotation_tools ${catkin_EXPORTED_TARGETS})
+
+add_executable(background_image_checker src/background_image_checker.cpp)
+target_link_libraries(background_image_checker ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+add_dependencies(background_image_checker ${catkin_EXPORTED_TARGETS})

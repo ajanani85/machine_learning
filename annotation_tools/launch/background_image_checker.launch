@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+	<arg name="path" default="/home/ubuntu/catkin_ws/machine_learning_pictures/Landing/landingpad_bg.txt"/>
+	<node pkg="annotation_tools" type="background_image_checker" name="background_image_checker" output="screen">
+		<param name="path" value="$(arg path)"/>
+	</node>
+</launch>
