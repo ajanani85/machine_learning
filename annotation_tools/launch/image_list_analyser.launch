@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-	<arg name="path" default="/home/ubuntu/catkin_ws/machine_learning_pictures/Landing/landingpad_annotations.txt"/>
+	<arg name="path" default="/home/ubuntu/catkin_ws/machine_learning_pictures/Joints/upper_penta_joint/images/upper_penta_joint_1/annotations.txt"/>
 	<node pkg="annotation_tools" type="image_list_analyser" name="image_list_analyser" output="screen">
 		<param name="path" value="$(arg path)"/>
 	</node>

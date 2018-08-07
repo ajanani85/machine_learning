@@ -57,7 +57,7 @@ void checkBackGrounds()
   in.close();
   if(lines.size() == 0)
   {
-    ROS_INFO(RED " FAILED: File is empty or the path is incorrect." COLOR_RESET);
+    ROS_INFO(RED " FAILED: File is empty or the path is incorrect. Passed Path: %s" COLOR_RESET, path_.c_str());
     raise(SIGINT);
   }
   printf(GREEN "\rReading the content...Completed." COLOR_RESET);

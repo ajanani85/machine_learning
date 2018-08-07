@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <launch>
-	<arg name="location" default="/home/ubuntu/catkin_ws/machine_learning_pictures/Landing/images/half_shadows/half_shadows_6"/>
+	<arg name="location" default="/home/ubuntu/catkin_ws/machine_learning_pictures/Joints/lower_penta_joint/images/lower_penta_joint_1"/>
 	<arg name="images" default="$(arg location)/pos"/>
-	<arg name="annotations" default="$(arg location)/annoations.txt"/>
+	<arg name="annotations" default="$(arg location)/annotations.txt"/>
 	<arg name="backup" default="$(arg location)/backup.txt"/>
-	<arg name="helper" default="false"/>
+	<arg name="helper" default="true"/>
 	<node pkg="annotation_tools" type="annotation_tools" name="annotation_tools" output="screen">
 		<param name="images" value="$(arg images)"/>
 		<param name="annotations" value="$(arg annotations)"/>
