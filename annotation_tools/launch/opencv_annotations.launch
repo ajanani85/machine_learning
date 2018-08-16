@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-	<arg name="location" default="/home/ubuntu/catkin_ws/machine_learning_pictures/Joints/lower_penta_joint/images/lower_penta_joint_1"/>
+	<arg name="location" default="/home/ubuntu/image_sets/LandingPad_pepperoni/set1"/>
 	<arg name="images" default="$(arg location)/pos"/>
 	<arg name="annotations" default="$(arg location)/annotations.txt"/>
 	<arg name="backup" default="$(arg location)/backup.txt"/>

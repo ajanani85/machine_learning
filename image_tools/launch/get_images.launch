@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<launch>
+	<arg name="keyword" default="forklift"/>
+	<arg name="number_of_images" default="10"/>
+	<arg name="output_directory" default="/home/ubuntu/get_images_download/"/>
+	
+	
+	<node pkg="image_tools" type="get_images.py" name="get_images" output="screen">
+		<param name="keyword" value="$(arg keyword)"/>
+		<param name="number_of_images" value="$(arg number_of_images)"/>
+		<param name="output_directory" value="$(arg output_directory)"/>
+	</node>
+</launch>
