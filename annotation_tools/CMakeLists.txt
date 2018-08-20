@@ -103,7 +103,7 @@ find_package(OpenCV REQUIRED)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
+  INCLUDE_DIRS include
 #  LIBRARIES annotation_tools
 #  CATKIN_DEPENDS roscpp rospy std_msgs
 #  DEPENDS system_lib
@@ -197,7 +197,7 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-add_executable(annotation_tools src/annotation_tools.cpp)
+add_executable(annotation_tools src/annotation_tools.cpp)# src/Annotation.cpp)
 target_link_libraries(annotation_tools ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} X11)
 add_dependencies(annotation_tools ${catkin_EXPORTED_TARGETS})
 

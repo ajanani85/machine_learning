@@ -7,6 +7,7 @@
 #include <iostream>
 #include <csignal>
 #include <X11/Xlib.h>
+#include <vector>
 
 
 
