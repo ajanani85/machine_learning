@@ -18,17 +18,18 @@ def getImages():
 	output_directory_ = rospy.get_param("/get_images/output_directory")
 	chrome_driver_ = rospy.get_param("/get_images/chrome_driver")
 	color_space_ = rospy.get_param("/get_images/color_space")
-	resize_cols_ = rospy.get_param("/get_images/resize_cols")
-	resize_rows_ = rospy.get_param("/get_images/resize_rows")
+	height_ = rospy.get_param("/get_images/height")
+	width_ = rospy.get_param("/get_images/width")
+	exact_size_ = str(width_) + ", " + str(height_)
 	
 	#downloading the images
 	response = google_images_download.googleimagesdownload()   #class instantiation
-	arguments = {"keywords":keyword_,"limit":number_of_images_,"print_urls":False , "print_paths":False, "chromedriver":chrome_driver_, "output_directory":output_directory_}   #creating list of arguments
+	arguments = {"keywords":keyword_,"limit":number_of_images_,"print_urls":False , "print_paths":False, "chromedriver":chrome_driver_, "output_directory":output_directory_, "exact_size": exact_size_}   #creating list of arguments
 	paths = response.download(arguments)   #passing the arguments to the function
 	
 	#renaming the images:
 	#1. listing all the image files
-	path = output_directory_ + keyword_ 
+	path = output_directory_ + "/" + keyword_ 
 	files = os.listdir(path)
 	
 	number_of_zero_fill = len(str(number_of_images_))
@@ -41,9 +42,9 @@ def getImages():
 		if img is None:
 			os.remove(path + "/" + file) 
 			continue
-		if(resize_cols_ > 0 and resize_rows_ > 0):
-			resized_img = cv2.resize(img, (resize_cols_, resize_rows_))	
-			img = resized_img		
+		#if(resize_cols_ > 0 and resize_rows_ > 0):
+		#	resized_img = cv2.resize(img, (resize_cols_, resize_rows_))	
+		#	img = resized_img		
 		
 		#print path + "/" + file
 		result = cv2.imwrite(path + "/pos-" + str(img_cnt).zfill(number_of_zero_fill) + ".png", img)

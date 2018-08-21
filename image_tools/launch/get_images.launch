@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <launch>
-	<arg name="keyword" default="dodge charger"/>
-	<arg name="number_of_images" default="100"/>
-	<arg name="resize_cols" default="640"/>
-	<arg name="resize_rows" default="480"/>
+	<arg name="keyword" default="forklift"/>
+	<arg name="number_of_images" default="50"/>
+	<arg name="width" default="640"/>
+	<arg name="height" default="480"/>
 	
 	<!--
 		color_space select:
@@ -17,8 +17,8 @@
 		<param name="number_of_images" value="$(arg number_of_images)"/>
 		<param name="output_directory" value="$(find image_tools)/images"/>
 		<param name="chrome_driver" value="$(find image_tools)/chromedriver/chromedriver"/>
-		<param name="resize_rows" value="$(arg resize_rows)"/>
-		<param name="resize_cols" value="$(arg resize_cols)"/>
+		<param name="width" value="$(arg width)"/>
+		<param name="height" value="$(arg height)"/>
 		<param name="color_space" value="$(arg color_space)"/>
 	</node>
 </launch>
