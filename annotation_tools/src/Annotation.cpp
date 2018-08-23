@@ -16,11 +16,16 @@ Annotation::Annotation()
 {
 
 }
-Annotation::Annotation(const std::string &imageset_location)
+Annotation::Annotation(const std::string &imageset_location, int class_id)
 {
 	imageset_location_ = new boost::filesystem::path(imageset_location);
 	parent = imageset_location_->parent_path();
+	//printf("imageset_location: %s \n", imageset_location.c_str());
+	//printf("annotations_path_: %s \n", std::string(parent.string() + std::string("/label")).c_str());
 	annotations_path_ = createPath(parent.string() + std::string("/label"));
+
+
+	class_id_ = class_id;
 }
 Annotation::~Annotation()
 {
@@ -58,6 +63,7 @@ void Annotation::addAnnotation(const std::string &file_name, std::vector<cv::Rec
 	if(debug)
 	{
 		printf("image name: %s\n", file_name_no_path.c_str());
+		printf("passed filename: %s \n", file_name.c_str());
 	}
 	std::ofstream opencv_annotation_file(parent.string() + std::string("/annotations.txt"), std::ios::out | std::ios::app);
 	opencv_annotation_file << file_name << " " << annotations.size();
@@ -70,14 +76,18 @@ void Annotation::addAnnotation(const std::string &file_name, std::vector<cv::Rec
 
 
 	//Converting annotation file to Darknet Format
-	OpencvToDarknet(annotations, img_height, img_width);
+	auto darknet_annotations = OpencvToDarknet(annotations, img_height, img_width);
 	//Creating annotation file
-	std::string image_path = annotations_path_.string() + "/" + file_name_no_path;
+	std::string image_path = annotations_path_.string() + "/" + file_name_no_path + ".txt";
 	std::ofstream darknet_annotation_file(image_path, std::ios::out);
 
-	for(int i = 0; i < annotations.size(); i++)
+	for(int i = 0; i < darknet_annotations.size(); i++)
 	{
-		darknet_annotation_file << i << " " << annotations[i].x << " " << annotations[i].y << " " << annotations[i].width << " " << annotations[i].height;
+		darknet_annotation_file << class_id_;
+		for(int j = 0; j <= 3; j++)
+		{
+			darknet_annotation_file << " " << darknet_annotations[i][j];
+		}
 		if(i > 0 && i != annotations.size() - 1)
 		{
 			darknet_annotation_file << std::endl;
@@ -90,19 +100,30 @@ void Annotation::addAnnotation(const std::string &file_name, std::vector<cv::Rec
  * OpenCV Format is repect to the top left corner of the annotation. X, Y and Width and Height are based on absolute pixel coordinates
  * Darknet Format is respect to the center of the annotation. X, Y and width and height are based on the relative pixel coordinates
  */
-void Annotation::OpencvToDarknet(std::vector<cv::Rect> &src, int img_height, int img_width)
+std::vector<std::vector<float>> Annotation::OpencvToDarknet(std::vector<cv::Rect> &src, int img_height, int img_width)
 {
+
+	std::vector<std::vector<float>> annotations;
+	if(src.size() == 0) return annotations;
 	for(int i = 0; i < src.size(); i++)
 	{
+		float dw = 1.0 / img_width;
+		float dh = 1.0 / img_height;
 		//getting the center in pixel:
-		cv::Point center(src[i].x + img_width / 2, src[i].y - img_height / 2);
-		src[i].x = center.x / img_width;
-		src[i].y = center.y / img_height;
-		src[i].width = src[i].width / img_width;
-		src[i].height = src[i].height / img_height;
+		cv::Point center(src[i].x + src[i].width / 2, src[i].y + src[i].height / 2);
 
+		printf("center: %d, %d\n", center.x, center.y);
+
+		std::vector<float> annotate;
+		annotate.push_back(center.x * dw);
+		annotate.push_back(center.y * dh);
+		annotate.push_back(src[i].width * dw);
+		annotate.push_back(src[i].height * dh);
+
+		printf("d_annotation: %f, %f, %f, %f\n", annotate[0], annotate[1], annotate[2], annotate[3]);
+		annotations.push_back(annotate);
 	}
-
+	return annotations;
 }
 
 bool Annotation::fileExist(const std::string &loc)
@@ -154,6 +175,13 @@ void Annotation::OpencvToDarknetAnnotation(const std::string &cv_annotation_file
 	{
 
 		boost::filesystem::path image_path(line.substr(0, line.find(" ")));
+
+		cv::Mat img = cv::imread(image_path.string());
+		if (img.empty())
+		{
+			continue;
+		}
+
 		boost::filesystem::path parent_path = image_path.parent_path();
 
 		std::string annotation_file_path_ = parent_path.string() + std::string("/label/") + image_path.stem().string() + std::string(".txt");
@@ -164,12 +192,17 @@ void Annotation::OpencvToDarknetAnnotation(const std::string &cv_annotation_file
 		}
 
 		std::vector<cv::Rect> rects = getOpencvRect(line);
+		auto darknet_rects = OpencvToDarknet(rects, img.size().height, img.size().width);
 
 		std::ofstream annotation_file(annotation_file_path_, std::ios::out);
 
-		for(int i = 0; i < rects.size(); i++)
+		for(int i = 0; i < darknet_rects.size(); i++)
 		{
-			annotation_file << i << " " << rects[i].x << " " << rects[i].y << " " << rects[i].width << " " << rects[i].height;
+			annotation_file << class_id_;
+			for(int j = 0; j <= 3; j++)
+			{
+				annotation_file << " " << darknet_rects[i][j];
+			}
 			if(i != rects.size() - 1)
 			{
 				annotation_file << std::endl;

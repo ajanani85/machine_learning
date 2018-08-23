@@ -8,7 +8,7 @@
 #include <csignal>
 #include <X11/Xlib.h>
 #include <vector>
-
+#include <boost/filesystem.hpp>
 #include <annotation_tools/Annotation.h>
 
 
@@ -23,7 +23,7 @@ std::vector<cv::Rect> get_annotations(cv::Mat);
 void drawPreviousAnnotations(cv::Mat);
 std::string image_folder_ = "";
 std::string annotation_location_ = "";
-std::string backup_file_ = "./opencv_annotation_tag.txt";
+std::string backup_file_ = "/backup.txt";
 int first_image_index_ = 0;
 std::string NODE_NAME_="annotation_tools";
 
@@ -39,6 +39,7 @@ Display* d;
 Screen*  s;
 int image_width;
 int image_height;
+int class_id_ = 0;
 
 std::vector<cv::Rect> previous_annotations;
 
@@ -260,56 +261,45 @@ bool fileExist(std::string &loc)
   }
 }
 
-void processBackUp(std::string &location, std::string &img_location)
+void processBackUp()
 {
-  if(fileExist(location))
+  std::string backup_file_location = boost::filesystem::path(image_folder_).parent_path().string() + backup_file_;
+  if(fileExist(backup_file_location))
   {
-    std::ifstream in(location);
+    std::ifstream in(backup_file_location);
     std::string line;
     int line_cnt = 0;
-    bool potentialJump = false;
     while(std::getline(in, line))
     {
-      if(potentialJump)
-      {
-        first_image_index_ = std::stoi(line);
-      }
-      if(line_cnt == 0 && img_location.compare(line) == 0)
-      {
-        potentialJump = true;
-        line_cnt++;
-      }
-
-
+    	if(line_cnt == 1)
+    	{
+    		first_image_index_ = std::stoi(line) + 1;
+    	}
+    	line_cnt++;
     }
+    in.close();
   }
+
 }
 
 void getParam()
 {
-  ros::param::param<std::string>(NODE_NAME_ + "/images", image_folder_, image_folder_);
-  ros::param::param<std::string>(NODE_NAME_ + "/annotations", annotation_location_, annotation_location_);
-  ros::param::param<std::string>(NODE_NAME_ + "/backup", backup_file_, backup_file_);
+  ros::param::param<std::string>(NODE_NAME_ + "/image_location", image_folder_, image_folder_);
   ros::param::param<bool>(NODE_NAME_ + "/helper", helper_, helper_);
+  ros::param::param<int>(NODE_NAME_ + "/class_id", class_id_, class_id_);
   
-  annotation = new am::Annotation(image_folder_);
+  annotation = new am::Annotation(image_folder_, class_id_);
   auto locations = annotation->getAnnotationFileLocations();
-  for(auto l : locations)
-  {
-	  ROS_INFO("Location: %s", l.c_str());
-  }
 
-
-  ROS_INFO("annotation_location_: %s", annotation_location_.c_str());
-
-
-  processBackUp(backup_file_, image_folder_);
+  processBackUp();
 }
 void saveBackup(std::string &img_location, int img_index)
 {
-  std::ofstream f(backup_file_);
+  std::string backup_file_location = boost::filesystem::path(image_folder_).parent_path().string() + backup_file_;
+  std::ofstream f(backup_file_location);
   f << img_location << "\n";
   f << img_index << "\n";
+  f.close();
 }
 void signal_handler(int signal)
 {
@@ -329,11 +319,11 @@ int main( int argc, char** argv )
 	
     string image_folder(image_folder_);
     string annotations_file(annotation_location_);
-    if (annotations_file.empty())
+    /*if (annotations_file.empty())
     {
         ROS_INFO("Annotation file path is invalid");
         return -1;
-    }
+    }*/
     if (image_folder.empty() )
     {
       ROS_INFO("image file path is invalid");
@@ -387,7 +377,8 @@ int main( int argc, char** argv )
         annotations[filenames[i]] = current_annotations;
         printf("\rImage Left: %d", (int)(filenames.size() - i - 1));
         fflush(stdout);
-        saveAnnotation(annotations_file, current_annotations, filenames[i]);
+        //saveAnnotation(annotations_file, current_annotations, filenames[i]);
+        annotation->addAnnotation(std::string(filenames[i]), current_annotations, current_image.size().height, current_image.size().width, false);
         saveBackup(image_folder_,i);
         // Check if the ESC key was hit, then exit earlier then expected
         if(stop){

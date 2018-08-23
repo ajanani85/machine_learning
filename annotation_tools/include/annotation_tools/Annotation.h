@@ -23,18 +23,19 @@ private:
 	boost::filesystem::path parent;
 
 	std::string opencv_annotation_file_location_ = "";
+	int class_id_=0;
 
 
 public:
 	Annotation();
-	Annotation(const std::string &imageset_location);
+	Annotation(const std::string &imageset_location, int class_id = 0);
 	~Annotation();
 
 	void addAnnotation(const std::string &file_name, std::vector<cv::Rect> &annotations, int img_height, int img_width, bool debug = false);
 
 	std::string getParent();
 	std::vector<std::string> getAnnotationFileLocations();
-	void OpencvToDarknet(std::vector<cv::Rect> &src, int img_height, int img_width);
+	std::vector<std::vector<float>> OpencvToDarknet(std::vector<cv::Rect> &src, int img_height, int img_width);
 
 
 	bool fileExist(const std::string &loc);

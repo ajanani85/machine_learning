@@ -1,14 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-	<arg name="location" default="/home/ubuntu/image_sets/LandingPad_pepperoni/set2"/>
-	<arg name="images" default="$(arg location)/pos"/>
-	<arg name="annotations" default="$(arg location)/annotations.txt"/>
-	<arg name="backup" default="$(arg location)/backup.txt"/>
-	<arg name="helper" default="true"/>
 	<node pkg="annotation_tools" type="annotation_tools" name="annotation_tools" output="screen">
-		<param name="images" value="$(arg images)"/>
-		<param name="annotations" value="$(arg annotations)"/>
-		<param name="backup" value="$(arg backup)"/>
-		<param name="helper" value="$(arg helper)"/>
+		<rosparam command="load" file="$(find annotation_tools)/launch/annotation_tools.yaml" />
 	</node>
 </launch>
