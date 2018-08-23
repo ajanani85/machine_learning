@@ -9,6 +9,8 @@
 #include <X11/Xlib.h>
 #include <vector>
 
+#include <annotation_tools/Annotation.h>
+
 
 
 using namespace std;
@@ -24,6 +26,8 @@ std::string annotation_location_ = "";
 std::string backup_file_ = "./opencv_annotation_tag.txt";
 int first_image_index_ = 0;
 std::string NODE_NAME_="annotation_tools";
+
+am::Annotation *annotation = nullptr;
 
 // Public parameters
 Mat image;
@@ -288,6 +292,13 @@ void getParam()
   ros::param::param<std::string>(NODE_NAME_ + "/backup", backup_file_, backup_file_);
   ros::param::param<bool>(NODE_NAME_ + "/helper", helper_, helper_);
   
+  annotation = new am::Annotation(image_folder_);
+  auto locations = annotation->getAnnotationFileLocations();
+  for(auto l : locations)
+  {
+	  ROS_INFO("Location: %s", l.c_str());
+  }
+
 
   ROS_INFO("annotation_location_: %s", annotation_location_.c_str());
 
