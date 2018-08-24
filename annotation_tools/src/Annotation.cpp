@@ -112,7 +112,7 @@ std::vector<std::vector<float>> Annotation::OpencvToDarknet(std::vector<cv::Rect
 		//getting the center in pixel:
 		cv::Point center(src[i].x + src[i].width / 2, src[i].y + src[i].height / 2);
 
-		printf("center: %d, %d\n", center.x, center.y);
+		//printf("center: %d, %d\n", center.x, center.y);
 
 		std::vector<float> annotate;
 		annotate.push_back(center.x * dw);
@@ -120,7 +120,7 @@ std::vector<std::vector<float>> Annotation::OpencvToDarknet(std::vector<cv::Rect
 		annotate.push_back(src[i].width * dw);
 		annotate.push_back(src[i].height * dh);
 
-		printf("d_annotation: %f, %f, %f, %f\n", annotate[0], annotate[1], annotate[2], annotate[3]);
+		//printf("d_annotation: %f, %f, %f, %f\n", annotate[0], annotate[1], annotate[2], annotate[3]);
 		annotations.push_back(annotate);
 	}
 	return annotations;
@@ -158,39 +158,87 @@ bool Annotation::createPath(const boost::filesystem::path &path)
 	return path_status;
 }
 
+int Annotation::getNumberOfLines(const std::string &file_location)
+{
+	//Getting the number of lines
+	std::ifstream in(file_location);
+	int numLines = 0;
+	std::string unused;
+
+	while ( std::getline(in, unused) )
+	{
+		++numLines;
+	}
+
+	in.close();
+	return numLines;
+}
+
+
+int Annotation::getFileContent(const std::string &file_location, std::vector<std::string> &content)
+{
+	//Getting the number of lines
+	std::ifstream in(file_location);
+	std::string unused;
+
+	while ( std::getline(in, unused) )
+	{
+		content.push_back(unused);
+	}
+	in.close();
+	//printf("Compelted Reading The Annotation File\n");
+	return (int)content.size();
+}
+
 //This function converts the opencv cascade style annotation to darknet annotation format.
-void Annotation::OpencvToDarknetAnnotation(const std::string &cv_annotation_file, bool debug)
+void Annotation::OpencvToDarknetAnnotation(const std::string &cv_annotation_file, const std::string &destination, bool debug)
 {
 
 	if(!fileExist(cv_annotation_file))
 	{
+		printf("Annotation File Does Not Exist\n");
 		return;
 	}
 
-	std::ifstream in(cv_annotation_file);
-	std::string line;
-	int line_cnt = 0;
-	bool potentialJump = false;
-	while(std::getline(in, line))
-	{
+	//create paths for images and labels
+	//
+	//boost::filesystem::path default_label_path = createPath(boost::filesystem::path(cv_annotation_file).parent_path().string() + "/labels");
 
+	printf("Getting ready ....\n");
+	//int number_of_lines = getNumberOfLines(cv_annotation_file);
+	std::vector<std::string> content;
+	int number_of_lines = getFileContent(cv_annotation_file, content);
+
+	int line_cnt = 1;
+	int invalid_images_cnt = 0;
+	printf("\r Processing image %d out of %d ", line_cnt, number_of_lines);
+	for(auto line : content)
+	{
 		boost::filesystem::path image_path(line.substr(0, line.find(" ")));
+		boost::filesystem::path default_image_path = createPath(destination + "/images");
+		boost::filesystem::path default_label_path = createPath(destination + "/labels");
+
+
 
 		cv::Mat img = cv::imread(image_path.string());
+
+
 		if (img.empty())
 		{
+			invalid_images_cnt++;
+			//printf("Annotation: Could Not Find The Image: %s \n", image_path.string().c_str());
 			continue;
 		}
+		//Writing the image in destination directory
+		std::string image_name = std::string("/img-") + std::to_string(line_cnt) + std::string(".png");
+		std::string annotation_name = std::string("/img-") + std::to_string(line_cnt) + std::string(".txt");
+		std::string img_new_location_ = default_image_path.string() + image_name;
 
-		boost::filesystem::path parent_path = image_path.parent_path();
+		cv::imwrite(img_new_location_, img);
 
-		std::string annotation_file_path_ = parent_path.string() + std::string("/label/") + image_path.stem().string() + std::string(".txt");
 
-		if(!pathExist((parent_path.string() + std::string("/label"))))
-		{
-			createPath(parent_path.string() + std::string("/label"));
-		}
-
+		std::string annotation_file_path_ = default_label_path.string() + annotation_name;
+		//printf("annotation_file_path_: %s \n",annotation_file_path_.c_str());
 		std::vector<cv::Rect> rects = getOpencvRect(line);
 		auto darknet_rects = OpencvToDarknet(rects, img.size().height, img.size().width);
 
@@ -209,7 +257,13 @@ void Annotation::OpencvToDarknetAnnotation(const std::string &cv_annotation_file
 			}
 		}
 		annotation_file.close();
+
+		printf("\r Processing image %d out of %d ", line_cnt, number_of_lines);
+		line_cnt++;
 	}
+	printf(" Processing Is Completed.\n");
+	printf(" Invalid Images: %d, %f\n", invalid_images_cnt, invalid_images_cnt * 100.0/number_of_lines);
+	printf(" Accepted Images: %d, %f\n", line_cnt, line_cnt * 100.0/number_of_lines);
 
 }
 

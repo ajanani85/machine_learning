@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+  <node name="to_darknet_annotaiton_converter" pkg="annotation_tools" type="to_darknet_annotaiton_converter" output="screen">
+    <rosparam command="load" file="$(find annotation_tools)/launch/to_darknet_annotation_converter.yaml"/>
+  </node>
+</launch>

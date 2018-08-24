@@ -201,6 +201,10 @@ add_executable(annotation_tools src/annotation_tools.cpp src/Annotation.cpp)
 target_link_libraries(annotation_tools ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} X11)
 add_dependencies(annotation_tools ${catkin_EXPORTED_TARGETS})
 
+add_executable(to_darknet_annotaiton_converter src/to_darknet_annotation_converter.cpp src/Annotation.cpp)
+target_link_libraries(to_darknet_annotaiton_converter ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} X11)
+add_dependencies(to_darknet_annotaiton_converter ${catkin_EXPORTED_TARGETS})
+
 add_executable(image_list_analyser src/background_image_checker.cpp)
 target_link_libraries(image_list_analyser ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 add_dependencies(image_list_analyser ${catkin_EXPORTED_TARGETS})

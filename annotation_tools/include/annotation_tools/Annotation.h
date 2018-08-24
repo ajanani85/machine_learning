@@ -37,16 +37,17 @@ public:
 	std::vector<std::string> getAnnotationFileLocations();
 	std::vector<std::vector<float>> OpencvToDarknet(std::vector<cv::Rect> &src, int img_height, int img_width);
 
-
 	bool fileExist(const std::string &loc);
 	bool pathExist(const std::string &path);
 	bool pathExist(const boost::filesystem::path &path);
 	bool createPath(const boost::filesystem::path &path);
 	boost::filesystem::path createPath(const std::string &path);
 
-	void OpencvToDarknetAnnotation(const std::string &cv_annotation_file, bool debug = false);
+	void OpencvToDarknetAnnotation(const std::string &cv_annotation_file, const std::string &destination, bool debug = false);
 	std::vector<cv::Rect> getOpencvRect(const std::string &annotation_line);
 	std::vector<std::string> getSubStrings(const std::string &src, const char &delim);
+	int getNumberOfLines(const std::string &file_location);
+	int getFileContent(const std::string &file_location, std::vector<std::string> &content);
 
 };
 }

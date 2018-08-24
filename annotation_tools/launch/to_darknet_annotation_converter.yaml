@@ -1,0 +1,2 @@
+annotation_file: '/home/ubuntu/image_sets/machine_learning_pictures/Landing/images/annotations.txt'
+destination_folder: '/home/ubuntu/image_sets/machine_learning_pictures/Landing/darknet'
