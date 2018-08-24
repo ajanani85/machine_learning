@@ -1,2 +1,3 @@
-annotation_file: '/home/ubuntu/image_sets/machine_learning_pictures/Landing/images/annotations.txt'
+annotation_file: '/home/ubuntu/image_sets/machine_learning_pictures/Landing/images/annotations-normals.txt'
 destination_folder: '/home/ubuntu/image_sets/machine_learning_pictures/Landing/darknet'
+test_percentage: 10.0

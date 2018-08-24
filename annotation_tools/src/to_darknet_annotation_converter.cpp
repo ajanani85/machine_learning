@@ -20,9 +20,11 @@ int main(int argc, char** argv)
 
 	std::string annotation_file_ = "";
 	std::string destination_folder_ = "";
+	float test_percentage = 0.0;
 
 	ros::param::param<std::string>(NODE_NAME_ + "/annotation_file", annotation_file_, annotation_file_);
 	ros::param::param<std::string>(NODE_NAME_ + "/destination_folder", destination_folder_, destination_folder_);
+	ros::param::param<float>(NODE_NAME_ + "/test_percentage", test_percentage, test_percentage);
 	if(annotation_file_ == "")
 	{
 		ROS_INFO("Invalid Annotation File Location");
@@ -36,7 +38,7 @@ int main(int argc, char** argv)
 
 	am::Annotation annotation = am::Annotation();
 	annotation.createPath(destination_folder_);
-	annotation.OpencvToDarknetAnnotation(annotation_file_, destination_folder_);
+	annotation.OpencvToDarknetAnnotation(annotation_file_, destination_folder_, test_percentage);
 
 
 

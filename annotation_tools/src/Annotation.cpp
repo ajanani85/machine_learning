@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <stdio.h>
+#include <algorithm>
 
 namespace am
 {
@@ -191,7 +192,7 @@ int Annotation::getFileContent(const std::string &file_location, std::vector<std
 }
 
 //This function converts the opencv cascade style annotation to darknet annotation format.
-void Annotation::OpencvToDarknetAnnotation(const std::string &cv_annotation_file, const std::string &destination, bool debug)
+void Annotation::OpencvToDarknetAnnotation(const std::string &cv_annotation_file, const std::string &destination, float test_percentage, bool debug)
 {
 
 	if(!fileExist(cv_annotation_file))
@@ -207,6 +208,7 @@ void Annotation::OpencvToDarknetAnnotation(const std::string &cv_annotation_file
 	printf("Getting ready ....\n");
 	//int number_of_lines = getNumberOfLines(cv_annotation_file);
 	std::vector<std::string> content;
+	std::vector<std::string> accepted_images;
 	int number_of_lines = getFileContent(cv_annotation_file, content);
 
 	int line_cnt = 1;
@@ -257,14 +259,86 @@ void Annotation::OpencvToDarknetAnnotation(const std::string &cv_annotation_file
 			}
 		}
 		annotation_file.close();
+		accepted_images.push_back(img_new_location_);
 
 		printf("\r Processing image %d out of %d ", line_cnt, number_of_lines);
 		line_cnt++;
 	}
-	printf(" Processing Is Completed.\n");
-	printf(" Invalid Images: %d, %f\n", invalid_images_cnt, invalid_images_cnt * 100.0/number_of_lines);
-	printf(" Accepted Images: %d, %f\n", line_cnt, line_cnt * 100.0/number_of_lines);
+	printf("Processing Is Completed.\n");
+	printf("Invalid Images: %d, %f\n", invalid_images_cnt, invalid_images_cnt * 100.0/number_of_lines);
+	printf("Accepted Images: %d, %f\n", line_cnt, line_cnt * 100.0/number_of_lines);
 
+	printf("Allocating Testing and Training Bucket ...\n");
+	//creating test.txt and train.txt in the parent of the destination folder
+	std::ofstream training_images_file(destination + "/train.txt");
+	std::ofstream testing_images_file(destination + "/test.txt");
+
+	int number_of_test_components = test_percentage * accepted_images.size() / 100.0;
+	printf("Number of test components = %d\n", number_of_test_components);
+	std::vector<int> test_images_indices;
+
+	std::srand((unsigned)time(0));
+	//getting the random indices
+	for(int i = 0; i <= number_of_test_components; i++)
+	{
+		printf("size of the list sofar: %d", (int)test_images_indices.size());
+		bool itIsRepeated = true;
+
+		while(itIsRepeated)
+		{
+			int index = std::rand() % accepted_images.size();
+			//printf("new random: %d \n", index);
+			//only if the random index is not repeated, add to the list
+			if(!contains(test_images_indices, index))
+			{
+				//printf("adding random: %d \n", index);
+				test_images_indices.push_back(index);
+				itIsRepeated = false;
+				break;
+			}
+			//usleep(10000);
+		}
+
+	}
+	printf("test_images_indices count = %d\n", (int)test_images_indices.size());
+	//writing into file
+	for(int i = 0; i < accepted_images.size(); i++)
+	{
+		//the i is found as part of the index
+		if(contains(test_images_indices, i))
+		{
+			testing_images_file << accepted_images[i] << std::endl;
+		}
+		else
+		{
+			training_images_file << accepted_images[i] << std::endl;
+		}
+	}
+
+	testing_images_file.close();
+	training_images_file.close();
+
+	printf("Allocation Is Completed ...\n");
+
+}
+
+bool Annotation::contains( std::vector<int> &Vec, int Element )
+{
+	if(Vec.size() == 0)
+	{
+		return false;
+	}
+	for(int i=0; i < Vec.size(); i++)
+	{
+		//std::cout << e << std::endl;
+		if(Element == Vec[i])
+		{
+			printf("%d is equal to Vec[%d] = %d\n", Element, i, Vec[i]);
+			return true;
+		}
+	}
+	//printf("Could not find the element in the list\n");
+	return false;
 }
 
 std::vector<cv::Rect> Annotation::getOpencvRect(const std::string &annotation_line)
