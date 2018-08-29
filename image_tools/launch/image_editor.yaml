@@ -1,0 +1,10 @@
+#folder location of the source images
+image_folder: '/home/ubuntu/image_sets/machine_learning_pictures/Landing/selected_images'
+#target angle that the image has to be rotated to
+max_rotation_angle: 360
+#increment step to reach max_rotation angle
+rotation_step: 1
+#Color space of the target image:
+# 0 -> grayscale
+# 1 -> rgb
+color_space: 0

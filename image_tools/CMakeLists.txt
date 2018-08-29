@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(image_tools)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+ add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -12,6 +12,8 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
 )
+
+find_package(OpenCV REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -197,3 +199,8 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+
+add_executable(image_editor src/cpp/image_editor.cpp)
+target_link_libraries(image_editor ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+add_dependencies(image_editor ${catkin_EXPORTED_TARGETS})

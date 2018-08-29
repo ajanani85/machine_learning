@@ -226,8 +226,6 @@ std::vector<cv::Rect> get_annotations(cv::Mat input_image)
 
 int saveAnnotation(const std::string &annotation_file_location, std::vector<cv::Rect> &annotation, const String &image_path)
 {
-
-
   if(annotation.size() > 0)
   {
     ofstream output(annotation_file_location.c_str(), std::ofstream::out | std::ofstream::app);

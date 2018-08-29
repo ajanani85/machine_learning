@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+	<node pkg="image_tools" type="image_editor" name="image_editor" output="screen">
+		<rosparam command="load" file="$(find image_tools)/launch/image_editor.yaml"/>
+	</node>
+</launch>
