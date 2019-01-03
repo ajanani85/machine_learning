@@ -44,13 +44,16 @@ def getImages():
 			continue
 		#if(resize_cols_ > 0 and resize_rows_ > 0):
 		#	resized_img = cv2.resize(img, (resize_cols_, resize_rows_))	
-		#	img = resized_img		
+		#	img = resized_img	
+		
+		if color_space_ == 1:
+			img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)	
 		
 		#print path + "/" + file
 		#check colorspace
 
-		result = cv2.imwrite(path + "/pos-" + str(img_cnt).zfill(number_of_zero_fill) + ".png", img)
-		print path + "/pos-" + str(img_cnt).zfill(number_of_zero_fill)  + ".png"
+		result = cv2.imwrite(path + "/img-" + str(img_cnt).zfill(number_of_zero_fill) + ".png", img)
+		print path + "/img-" + str(img_cnt).zfill(number_of_zero_fill)  + ".png"
 		if(result):
 			img_cnt = img_cnt + 1
 		
