@@ -1,0 +1,5 @@
+<launch>
+	<node pkg="annotation_tools" type="annotation_cleaner" name="annotation_cleaner" output="screen">
+		<rosparam command="load" file="$(find annotation_tools)/launch/annotation_cleaner.yaml"/>
+	</node>
+</launch>

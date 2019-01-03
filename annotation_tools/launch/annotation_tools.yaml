@@ -1,3 +1,4 @@
-image_location: '/home/ubuntu/image_sets/LandingPad_pepperoni/set2/pos'
+image_location: '/home/ubuntu/image_sets/am_landing_pad'
 helper: true
 class_id: 0
+test_percentage: 10.0

@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+	<node pkg="image_tools" type="image_mixer" name="image_mixer" output="screen">
+		<rosparam command="load" file="$(find image_tools)/launch/image_mixer.yaml"/>
+	</node>
+</launch>

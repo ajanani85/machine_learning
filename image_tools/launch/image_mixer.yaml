@@ -1,0 +1,3 @@
+image_locations: ['/home/ubuntu/image_sets/arrow_detection/ml_2018-9-14-12-52-37', '/home/ubuntu/image_sets/arrow_detection/ml_2018-9-14-11-51-21']
+destination_folder:  '/home/ubuntu/image_sets/arrow_detection/images'
+convert_to_gray_scale: false

@@ -47,6 +47,8 @@ def getImages():
 		#	img = resized_img		
 		
 		#print path + "/" + file
+		#check colorspace
+
 		result = cv2.imwrite(path + "/pos-" + str(img_cnt).zfill(number_of_zero_fill) + ".png", img)
 		print path + "/pos-" + str(img_cnt).zfill(number_of_zero_fill)  + ".png"
 		if(result):

@@ -200,6 +200,9 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
+add_executable(image_mixer src/cpp/image_mixer.cpp)
+target_link_libraries(image_mixer ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+add_dependencies(image_mixer ${catkin_EXPORTED_TARGETS})
 
 add_executable(image_editor src/cpp/image_editor.cpp)
 target_link_libraries(image_editor ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})

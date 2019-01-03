@@ -1,0 +1,4 @@
+annotation_directory: '/home/ubuntu/image_sets/warehouse/labels'
+image_directory: '/home/ubuntu/image_sets/warehouse/images'
+grayscale: true
+test_percentage: 10.0
